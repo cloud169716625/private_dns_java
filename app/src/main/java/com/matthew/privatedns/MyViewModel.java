@@ -56,7 +56,7 @@ public class MyViewModel extends BaseObservable {
                     SimpleResolver sr = new SimpleResolver("8.8.4.4");
                     System.out.println("Standard resolver: \n");
                     message += "Resolver \n\n";
-                    message = sendAndPrint(sr, domain);
+                    message = sendAndPrint(sr, domain + ".");
                 }
             } catch (Exception e) {
                 Log.e("Error------------>", e.toString());
