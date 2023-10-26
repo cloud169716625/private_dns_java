@@ -5,15 +5,15 @@ import android.util.Log;
 import androidx.databinding.BaseObservable;
 import androidx.databinding.ObservableField;
 import androidx.databinding.Bindable;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
 
 import org.xbill.DNS.*;
 import org.xbill.DNS.Record;
 import org.xbill.DNS.dnssec.ValidatingResolver;
 
 import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 
 public class MyViewModel extends BaseObservable {
 //    public final MutableLiveData<String> domain = new MutableLiveData<>("www.fast.com.\n fiber.google.com.\n www.speedtest.net.\n");
@@ -37,32 +37,36 @@ public class MyViewModel extends BaseObservable {
 
     private class DnsResolverTask extends AsyncTask<Void, Void, String> {
         private String ROOT = ". IN DS 20326 8 2 E06D44B80B8F1D39A95C0B0D7C65D08458E880409BBC683457104237C7F8EC8D";
+        private int dnsPort = 53;
         @Override
         protected String doInBackground(Void... params) {
             String message = "";
-            try {
-                if (
-                    domain.equalsIgnoreCase("fast.com")
-                        || domain.equalsIgnoreCase("speedtest.net")
-                        || domain.equalsIgnoreCase("fiber.google.com")
-                ) {
-                    SimpleResolver resolver1 = new SimpleResolver("10.122.14.158");
-                    SimpleResolver resolver2 = new SimpleResolver("10.122.14.158");
-                    message = "Resolver-1 \n\n";
-                    message += sendAndPrint(resolver1, domain + ".") + "\n\n";
-                    message = "Resolver-2 \n\n";
-                    message += sendAndPrint(resolver2, domain + ".");
-                } else {
-                    SimpleResolver sr = new SimpleResolver("8.8.4.4");
-                    System.out.println("Standard resolver: \n");
-                    message += "Resolver \n\n";
-                    message = sendAndPrint(sr, domain + ".");
-                }
-            } catch (Exception e) {
-                Log.e("Error------------>", e.toString());
-                handleGenericError(e);
-                message = "\n" + "Error:" + e.getMessage();
-            }
+           try {
+               if (
+                   domain.equalsIgnoreCase("fast.com")
+                       || domain.equalsIgnoreCase("speedtest.net")
+                       || domain.equalsIgnoreCase("fiber.google.com")
+               ) {
+                   SimpleResolver resolver1 = new SimpleResolver("65.108.19.239");
+                   resolver1.setPort(53);
+                   SimpleResolver resolver2 = new SimpleResolver("208.51.60.222");
+                   resolver2.setPort(53);
+                   message = "Resolver-1 \n\n";
+                   message += sendAndPrint(resolver1, domain + ".") + "\n\n";
+                   message += "-------------------\n\n";
+                   message += "Resolver-2-1 \n\n";
+                   message += sendAndPrint(resolver2, domain + ".");
+               } else {
+                   SimpleResolver sr = new SimpleResolver("8.8.4.4");
+                   System.out.println("Standard resolver: \n");
+                   message += "Resolver \n\n";
+                   message = sendAndPrint(sr, domain + ".");
+               }
+           } catch (Exception e) {
+               Log.e("Error------------>", e.toString());
+               handleGenericError(e);
+               message = "\n" + "Error:" + e.getMessage();
+           } 
             return message;
         }
 
@@ -89,7 +93,20 @@ public class MyViewModel extends BaseObservable {
         }
     }
 
+    private static boolean isTargetDomainQuery(Message request, String targetDomain) {
+        // Implement logic to check if the query is for the target domain
+        // You can use request.getSectionArray(Section.QUESTION) to inspect the question section
+        // and check if it matches the target domain
+        // You may need to compare domain names and query types (e.g., Type.A for IPv4)
+        return false; // Replace with your logic
+    }
 
+    private static Message createRedirectResponse(String domain, String ipAddress, int port) {
+        // Create a DNS response with the desired IP address and port
+        // You can use the dnsjava library to build a response message
+        // Example: https://dnsjava.org/apidocs/index.html?org/xbill/DNS/Message.html
+        return null; // Replace with your implementation
+    }
 
     private void handleDNSResponse(String answer) {
         Log.d("DNS Response", answer.toString());
